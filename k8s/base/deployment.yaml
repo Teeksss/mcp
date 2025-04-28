@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-server
+  labels:
+    app: mcp-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mcp-server
+  template:
+    metadata:
+      labels:
+        app: mcp-server
+    spec:
+      containers:
+      - name: mcp-server
+        image: mcp-server:latest
+        resources:
+          limits:
+            nvidia.com/gpu: 1
+            memory: "16Gi"
+            cpu: "4"
+          requests:
+            memory: "8Gi"
+            cpu: "2"
+        env:
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: mcp-secrets
+              key: redis-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: mcp-secrets
+              key: jwt-secret
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: model-cache
+          mountPath: /app/model-cache
+        - name: vector-db
+          mountPath: /app/vector-db
+      volumes:
+      - name: model-cache
+        persistentVolumeClaim:
+          claimName: model-cache-pvc
+      - name: vector-db
+        persistentVolumeClaim:
+          claimName: vector-db-pvc

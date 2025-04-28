@@ -1,0 +1,28 @@
+# Development environment configuration
+application:
+  debug: true
+  env: development
+  secret_key: dev_secret_key
+  cors_origins:
+    - http://localhost:3000
+    - http://localhost:8080
+
+database:
+  url: postgresql://localhost:5432/mcp_dev
+
+redis:
+  host: localhost
+  password: null
+
+kafka:
+  bootstrap_servers:
+    - localhost:9092
+  consumer_group: mcp-dev
+
+s3:
+  bucket: mcp-dev
+  endpoint_url: http://localhost:4566
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  registry_uri: http://localhost:5000

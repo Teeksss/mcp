@@ -1,0 +1,37 @@
+# Production environment configuration
+application:
+  debug: false
+  env: production
+  secret_key: ${MCP_APP_SECRET_KEY}
+  cors_origins:
+    - https://api.example.com
+    - https://app.example.com
+
+database:
+  url: ${MCP_DATABASE_URL}
+  pool_size: 50
+  max_overflow: 20
+
+redis:
+  host: ${MCP_REDIS_HOST}
+  password: ${MCP_REDIS_PASSWORD}
+  pool_size: 50
+
+kafka:
+  bootstrap_servers:
+    - ${MCP_KAFKA_BROKER_1}
+    - ${MCP_KAFKA_BROKER_2}
+    - ${MCP_KAFKA_BROKER_3}
+  consumer_group: mcp-prod
+  security_protocol: SASL_SSL
+  sasl_mechanism: PLAIN
+
+s3:
+  bucket: mcp-prod
+  access_key: ${MCP_AWS_ACCESS_KEY}
+  secret_key: ${MCP_AWS_SECRET_KEY}
+
+mlflow:
+  tracking_uri: ${MCP_MLFLOW_TRACKING_URI}
+  registry_uri: ${MCP_MLFLOW_REGISTRY_URI}
+  artifact_location: s3://mlflow-artifacts-prod/

@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+pydantic
+chromadb
+torch
+transformers
+redis
+python-jose[cryptography]
+passlib[bcrypt]
+prometheus_client
+sentry-sdk
+python-multipart

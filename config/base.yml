@@ -1,0 +1,41 @@
+# Base configuration for all environments
+application:
+  debug: false
+  log_level: INFO
+  cors_origins: []
+  max_workers: 4
+  request_timeout: 30
+
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  file_path: logs/mcp_server.log
+  max_size: 10485760
+  backup_count: 5
+  log_to_console: true
+
+database:
+  pool_size: 20
+  max_overflow: 10
+  pool_timeout: 30
+  pool_recycle: 3600
+
+redis:
+  port: 6379
+  db: 0
+  pool_size: 20
+  socket_timeout: 5
+
+kafka:
+  security_protocol: SASL_SSL
+  sasl_mechanism: PLAIN
+  batch_size: 16384
+  linger_ms: 5
+
+s3:
+  region: us-east-1
+
+mlflow:
+  experiment_name: mcp-server
+  artifact_location: s3://mlflow-artifacts/

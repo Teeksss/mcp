@@ -1,0 +1,119 @@
+# Deployment Configuration
+version: '1.0'
+
+# Environment configurations
+environments:
+  production:
+    namespace: mcp-prod
+    replicas: 3
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+    scaling:
+      min_replicas: 2
+      max_replicas: 10
+      target_cpu_utilization: 70
+    
+  staging:
+    namespace: mcp-staging
+    replicas: 2
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "1"
+        memory: "2Gi"
+    scaling:
+      min_replicas: 1
+      max_replicas: 5
+      target_cpu_utilization: 80
+
+# Docker configuration
+docker:
+  registry: registry.mcp-server.com
+  repository: mcp-server
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+    args:
+      BUILD_ENV: production
+
+# Kubernetes configuration
+kubernetes:
+  config_path: ~/.kube/config
+  contexts:
+    production: mcp-prod-cluster
+    staging: mcp-staging-cluster
+  
+  # Service configuration
+  service:
+    type: LoadBalancer
+    ports:
+      - name: http
+        port: 80
+        targetPort: 8000
+      - name: metrics
+        port: 9090
+        targetPort: 9090
+    
+    # Ingress configuration
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+      hosts:
+        - host: api.mcp-server.com
+          paths:
+            - path: /
+              pathType: Prefix
+
+# Monitoring configuration
+monitoring:
+  prometheus:
+    enabled: true
+    scrape_interval: 15s
+  
+  grafana:
+    enabled: true
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus:9090
+    
+  alerting:
+    enabled: true
+    slack_webhook: https://hooks.slack.com/services/xxx/yyy/zzz
+
+# Backup configuration
+backup:
+  enabled: true
+  schedule: "0 0 * * *"
+  retention:
+    days: 30
+  storage:
+    type: s3
+    bucket: mcp-backups
+    path: backups
+
+# Security configuration
+security:
+  ssl:
+    enabled: true
+    provider: letsencrypt
+  
+  network_policies:
+    enabled: true
+    ingress_rules:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                name: monitoring
+        ports:
+          - protocol: TCP
+            port: 9090
