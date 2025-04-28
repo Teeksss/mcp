@@ -1,40 +1,73 @@
-# MCP Server
+# MCP Server (Multi-Model + RAG + LLM Platform)
 
-Kurumsal düzeyde, çoklu model ve RAG destekli Model Kontrol Platformu (MCP) sunucusu.
+## Kurulum Rehberi
 
-## Genel Özellikler
+### Gereksinimler
 
-- Çoklu Model Yönetimi (versioning, registry)
-- Akıllı Yönlendirme & RAG Pipeline
-- Sağlam API ve servis mimarisi
-- Otomatik test, izleme, logging
-- Geliştirici dostu yapı
-
-## Hızlı Başlangıç
-
-```bash
-git clone https://github.com/Teeksss/mcp.git
-cd mcp
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-python run_server.py
-```
-
-## API Dökümantasyonu
-
-Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Python 3.9+**
+- **Node.js 16+** (frontend için)
+- **Tesseract** (OCR desteği için)
+- (Linux/Mac: `sudo apt install tesseract-ocr` veya `brew install tesseract`)
+- **pip** veya **poetry** (isteğe bağlı)
 
 ---
 
-## Katkı ve Test
+## 1. Backend Kurulumu
 
-Her katkı PR'ı otomatik testten geçmelidir.
+### a) Sanal Ortam Oluştur
 
 ```bash
-pytest
-flake8 src/
+python -m venv venv
+source venv/bin/activate
 ```
 
-Daha fazla detay için [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bakın.
+### b) Bağımlılıkları Yükle
+
+```bash
+pip install -r requirements.txt
+# veya
+poetry install
+```
+
+### c) Ortam Değişkenleri
+
+`.env` dosyasını oluştur:
+
+```bash
+cp .env.example .env
+```
+Gerekirse `OPENAI_API_KEY` ve diğer alanları doldur.
+
+### d) Veritabanını Başlat
+
+```bash
+python -c "from src.models.database import init_db; init_db()"
+```
+
+### e) Sunucuyu Çalıştır
+
+```bash
+uvicorn src.main:app --reload
+```
+- Uygulama arayüzü: [http://localhost:8000/docs](http://localhost:8000/docs)
+
+---
+
+## 2. Frontend (Web) Kurulumu
+
+```bash
+cd web
+npm install
+npm start
+```
+- Arayüz: [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 3. Notlar
+
+- PDF/OCR için Tesseract kurulmalı.
+- LLM entegrasyonu için `OPENAI_API_KEY` veya HuggingFace modeli indirecek internet bağlantısı gereklidir.
+- Vektör veritabanı ve LLM eklemek için ilgili Python dosyalarından kolayca genişletebilirsiniz.
+
+---

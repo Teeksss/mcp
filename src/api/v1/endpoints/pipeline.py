@@ -1,33 +1,23 @@
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
-from src.services.pipeline.orchestrator import PipelineOrchestrator
+from pydantic import BaseModel
+from src.services.rag.rag_service import RAGService
+from src.services.intelligence.model_manager import mm
 
 router = APIRouter(prefix="/api/v1/pipeline", tags=["Pipeline"])
 
-class PipelineConfig(BaseModel):
-    model_type: str
-    max_tokens: Optional[int] = 100
-    temperature: Optional[float] = 0.7
-
 class PipelineRequest(BaseModel):
     query: str
-    config: PipelineConfig
+    model_key: str = "gpt4"
+    top_k: int = 4
 
-class PipelineResponse(BaseModel):
-    result: Any
-    processing_time: float
-    status: str = "success"
-    error: Optional[str] = None
-
-@router.post("/execute", response_model=PipelineResponse)
-async def execute_pipeline(request: PipelineRequest):
-    orchestrator = PipelineOrchestrator()
-    try:
-        result = orchestrator.execute(request.query, request.config.dict())
-        return PipelineResponse(
-            result=result,
-            processing_time=0.12
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@router.post("/rag-inference")
+def rag_inference(req: PipelineRequest):
+    rag = RAGService()
+    docs = rag.retrieve_docs(req.query, top_k=req.top_k)
+    context = "\n".join([d['content'] for d in docs])
+    prompt = f"Cevap için sadece aşağıdaki bağlamı kullan:\n{context}\n\nSoru: {req.query}\nCevap:"
+    answer = mm.generate(req.model_key, prompt)
+    return {
+        "answer": answer,
+        "docs": docs
+    }
